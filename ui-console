@@ -1,0 +1,19 @@
+class Program  
+{  
+    static void Main(string[] args)  
+    {  
+        TcpServer tcpServer = new TcpServer(12345);  
+        UdpServer udpServer = new UdpServer(12346);  
+
+        tcpServer.Start();  
+        udpServer.Start();  
+
+        Console.WriteLine("Press any key to stop the servers...");  
+        Console.ReadKey();  
+
+        tcpServer.Stop();  
+        udpServer.Stop();  
+
+        Console.WriteLine("Servers stopped.");  
+    }  
+}
