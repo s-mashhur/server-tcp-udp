@@ -1,0 +1,54 @@
+using System;  
+using System.Net;  
+using System.Net.Sockets;  
+using System.Text;  
+using System.Threading;  
+
+public class UdpServer  
+{  
+    private UdpClient _udpClient;  
+    private bool _isRunning;  
+
+    public UdpServer(int port)  
+    {  
+        _udpClient = new UdpClient(port);  
+        _isRunning = false;  
+    }  
+
+    public void Start()  
+    {  
+        _isRunning = true;  
+        Console.WriteLine("UDP Server started...");  
+        ListenForMessages();  
+    }  
+
+    private void ListenForMessages()  
+    {  
+        while (_isRunning)  
+        {  
+            var receivedResults = _udpClient.ReceiveAsync();  
+            receivedResults.ContinueWith(task =>  
+            {  
+                var receivedResult = task.Result;  
+                var message = Encoding.UTF8.GetString(receivedResult.Buffer);  
+                Console.WriteLine($"Received: {message} from {receivedResult.RemoteEndPoint}");  
+
+                // Echo the message back to the client  
+                _udpClient.SendAsync(receivedResult.Buffer, receivedResult.Buffer.Length, receivedResult.RemoteEndPoint);  
+                Console.WriteLine($"Sent: {message} back to {receivedResult.RemoteEndPoint}");  
+
+                // Call the method again to listen for the next message  
+                if (_isRunning)  
+                {  
+                    ListenForMessages();  
+                }  
+            });  
+        }  
+    }  
+
+    public void Stop()  
+    {  
+        _isRunning = false;  
+        _udpClient.Close();  
+    }  
+}
